@@ -13,6 +13,7 @@ import com.techjd.userlisttest.R
 import com.techjd.userlisttest.adapters.UserAdapter
 import com.techjd.userlisttest.databinding.ActivityMainBinding
 import com.techjd.userlisttest.viewmodel.UserViewModel
+import com.techjd.utils.InternetConnection
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -33,15 +34,22 @@ class MainActivity : AppCompatActivity() {
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         val adapter = UserAdapter(glide)
-        userViewModel.makeCall().observe(this, {users ->
-            if (users != null) {
-                binding.recyclerView.adapter = adapter
-                adapter.setdata(users.data)
-                binding.progressBar.visibility = View.GONE
-            } else {
-                binding.progressBar.visibility = View.VISIBLE
-            }
-        })
+
+        if (InternetConnection.checkConnection(this)) {
+            userViewModel.makeCall().observe(this, {users ->
+                if (users != null) {
+                    binding.recyclerView.adapter = adapter
+                    adapter.setdata(users.data)
+                    binding.progressBar.visibility = View.GONE
+                } else {
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+            })
+        } else {
+            binding.noInternet.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.INVISIBLE
+        }
+
 
 
     }
